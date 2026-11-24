@@ -1,19 +1,32 @@
-import Logo from '@/assets/icons/Logo'
-import { Box } from '@/components/ui/box'
-import { Center } from '@/components/ui/center'
-import { Text } from '@/components/ui/text'
-import React from 'react'
+import { Button, ButtonText } from '@/components/ui/button';
+import { Center } from '@/components/ui/center';
+import { Text } from '@/components/ui/text';
+import { useSession } from '@/lib/session';
+import { Redirect } from 'expo-router';
+import { ActivityIndicator } from 'react-native';
 
 export default function Home() {
-  return (
-    <Box className="flex-1 bg-background">
-      <Center className="flex-1 gap-5">
-        <Logo />
-        <Text className="font-semibold">
-          Get started by editing
-          <Text className="text-primary/70">app/index.tsx</Text>
-        </Text>
+  const { signedIn, restoring, restoreError, restore } = useSession();
+
+  if (restoring) {
+    return (
+      <Center className="flex-1 bg-background gap-3">
+        <ActivityIndicator color="#10b981" />
+        <Text>Kontrollerar sessionen …</Text>
       </Center>
-    </Box>
-  )
+    );
+  }
+
+  if (restoreError) {
+    return (
+      <Center className="flex-1 bg-background gap-3 px-6">
+        <Text accessibilityRole="alert">Sessionen kunde inte kontrolleras.</Text>
+        <Button onPress={() => void restore()}>
+          <ButtonText>Försök igen</ButtonText>
+        </Button>
+      </Center>
+    );
+  }
+
+  return <Redirect href={signedIn ? '/expenses' : '/login'} />;
 }
