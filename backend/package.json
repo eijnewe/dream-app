@@ -4,16 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test tests/api.test.js",
+    "start": "node index.js",
+    "dev": "node --env-file=.env --watch index.js",
+    "setup": "node --env-file=.env setup.js",
+    "test:integration": "node --env-file=.env --test tests/expenses.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.24.6"
+    "pg": "^8.23.1"
   }
 }
