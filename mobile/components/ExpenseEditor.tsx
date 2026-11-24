@@ -1,14 +1,14 @@
 import { ExpenseCategory } from '@/components/ExpenseCategory';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonText } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
 import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { ApiError } from '@/lib/api';
 import { expenseCategories, parseExpenseAmount, type Expense } from '@/lib/expenses';
 import { useSession } from '@/lib/session';
-import { useNavigation, useRouter } from 'expo-router';
+import { Stack, useNavigation, useRouter } from 'expo-router';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useRef, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ const fieldClassName = 'rounded-md border border-border px-3 text-foreground';
 export function ExpenseEditor({ expense }: { expense?: Expense }) {
   const router = useRouter();
   const navigation = useNavigation();
+  const headerHeight = useHeaderHeight();
   const { request } = useSession();
   const submitting = useRef(false);
   const [saving, setSaving] = useState(false);
@@ -76,11 +77,22 @@ export function ExpenseEditor({ expense }: { expense?: Expense }) {
 
   return (
     <Box className="flex-1 bg-background">
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <Stack.Screen options={{
+        title: expense ? 'Redigera utgift' : 'Ny utgift',
+        headerLeft: () => (
+          <Button variant="ghost" size="sm" isDisabled={saving} onPress={close}>
+            <ButtonText>Tillbaka</ButtonText>
+          </Button>
+        ),
+      }} />
+      <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={headerHeight}
+        >
           <ScrollView keyboardShouldPersistTaps="handled">
-            <VStack space="lg" className="px-6 pb-6 pt-12">
-              <Heading size="2xl">{expense ? 'Redigera utgift' : 'Ny utgift'}</Heading>
+            <VStack space="lg" className="px-6 py-6">
               <VStack space="xs">
                 <Text bold>Belopp (kr)</Text>
                 <TextInput

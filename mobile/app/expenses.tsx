@@ -10,7 +10,7 @@ import { VStack } from '@/components/ui/vstack';
 import { formatAmount, formatExpenseDate, totalAmount, type Expense } from '@/lib/expenses';
 import { useSession } from '@/lib/session';
 import { useExpenseData } from '@/lib/use-expense-data';
-import { Link } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { useState } from 'react';
 import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,14 +35,15 @@ export default function Expenses() {
 
   return (
     <Box className="flex-1 bg-background">
-      <SafeAreaView style={{ flex: 1 }}>
-        <VStack space="sm" className="px-6 pb-4 pt-12">
-          <HStack space="sm" className="items-center justify-between">
-            <Heading size="2xl">Utgifter</Heading>
-            <Button variant="outline" isDisabled={loggingOut} onPress={() => void logout()}>
-              <ButtonText>{loggingOut ? 'Loggar ut …' : 'Logga ut'}</ButtonText>
-            </Button>
-          </HStack>
+      <Stack.Screen options={{
+        headerLeft: () => (
+          <Button variant="ghost" size="sm" isDisabled={loggingOut} onPress={() => void logout()}>
+            <ButtonText>{loggingOut ? 'Loggar ut …' : 'Logga ut'}</ButtonText>
+          </Button>
+        ),
+      }} />
+      <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
+        <VStack space="sm" className="px-6 pb-4 pt-4">
           <Link href="/expenses/form" asChild>
             <Button>
               <ButtonText>Ny utgift</ButtonText>

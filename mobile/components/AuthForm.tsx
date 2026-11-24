@@ -7,13 +7,13 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from '@/components/ui/form-control'
-import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { VStack } from '@/components/ui/vstack'
 import { ApiError, apiRequest } from '@/lib/api'
 import { useSession } from '@/lib/session'
 import { Buffer } from 'buffer'
 import { useRouter } from 'expo-router'
+import { useHeaderHeight } from 'expo-router/react-navigation'
 import { useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -29,6 +29,7 @@ const fieldClassName =
 
 export function AuthForm({ register = false }: { register?: boolean }) {
   const router = useRouter()
+  const headerHeight = useHeaderHeight()
   const { signIn } = useSession()
   const passwordInput = useRef<TextInput>(null)
   const submitting = useRef(false)
@@ -103,10 +104,11 @@ export function AuthForm({ register = false }: { register?: boolean }) {
 
   return (
     <Box className="flex-1 bg-background">
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={headerHeight}
         >
           <ScrollView
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
@@ -114,7 +116,6 @@ export function AuthForm({ register = false }: { register?: boolean }) {
           >
             <VStack space="xl" className="mx-auto w-full max-w-md px-6 py-8">
               <Text className="font-semibold text-primary">dream-app</Text>
-              <Heading size="2xl">{title}</Heading>
               {registered ?
                 <Text accessibilityRole="alert">
                   Kontot är skapat. Du kan nu logga in.

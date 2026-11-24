@@ -9,7 +9,7 @@ import { ApiError } from '@/lib/api';
 import { expensePath, formatAmount, formatExpenseDateTime, type Expense } from '@/lib/expenses';
 import { useSession } from '@/lib/session';
 import { useExpenseData } from '@/lib/use-expense-data';
-import { Link, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Link, Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,13 +56,14 @@ export default function ExpenseDetails() {
 
   return (
     <Box className="flex-1 bg-background">
-      <SafeAreaView style={{ flex: 1 }}>
-        <VStack space="sm" className="items-start px-6 pb-4 pt-12">
-          <Button variant="outline" isDisabled={deleting} onPress={() => router.dismissTo('/expenses')}>
+      <Stack.Screen options={{
+        headerLeft: () => (
+          <Button variant="ghost" size="sm" isDisabled={deleting} onPress={() => router.dismissTo('/expenses')}>
             <ButtonText>Till utgifter</ButtonText>
           </Button>
-          <Heading size="2xl">Utgiftsdetaljer</Heading>
-        </VStack>
+        ),
+      }} />
+      <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
         {!path || (state.status === 'error' && state.notFound) ? (
           <ExpenseMessage message="Utgiften hittades inte." />
         ) : state.status === 'loading' ? (
@@ -70,7 +71,7 @@ export default function ExpenseDetails() {
         ) : state.status === 'error' ? (
           <ExpenseMessage message="Utgiften kunde inte hämtas." retry={retry} />
         ) : (
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 16 }}>
+          <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}>
             <VStack space="md">
               <VStack space="sm" className="rounded-lg border border-border bg-card p-4">
                 <Heading size="xl" className="text-primary">{formatAmount(state.data.amount)}</Heading>
