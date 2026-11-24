@@ -43,6 +43,11 @@ export default function Expenses() {
               <ButtonText>{loggingOut ? 'Loggar ut …' : 'Logga ut'}</ButtonText>
             </Button>
           </HStack>
+          <Link href="/expenses/form" asChild>
+            <Button>
+              <ButtonText>Ny utgift</ButtonText>
+            </Button>
+          </Link>
           {logoutError && (
             <Text accessibilityRole="alert" className="text-destructive">
               Utloggningen misslyckades. Försök igen.

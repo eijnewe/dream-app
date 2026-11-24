@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ApiError } from './api';
 import { useSession } from './session';
 
@@ -12,9 +13,10 @@ export function useExpenseData<T>(path: string | null) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<{ path: string; value: Result<T> } | null>(null);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     if (!path) return;
 
+    setResult(null);
     const controller = new AbortController();
     request<T>(path, { signal: controller.signal }).then(
       (data) => {
@@ -31,7 +33,7 @@ export function useExpenseData<T>(path: string | null) {
     );
 
     return () => controller.abort();
-  }, [attempt, path, request]);
+  }, [attempt, path, request]));
 
   function retry() {
     setResult(null);
