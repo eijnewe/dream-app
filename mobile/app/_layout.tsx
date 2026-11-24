@@ -1,26 +1,19 @@
-import { Fab, FabIcon } from '@/components/ui/fab';
+import { Button } from '@/components/ui/button';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { MoonIcon, SunIcon } from '@/components/ui/icon';
+import { Icon, MoonIcon, SunIcon } from '@/components/ui/icon';
 import '@/global.css';
+import { SessionProvider, useSession } from '@/lib/session';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from 'expo-router';
 import { useFonts } from 'expo-font';
-import { Slot, usePathname } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+export { ErrorBoundary } from 'expo-router';
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -28,44 +21,65 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
-  }, [error]);
+    if (loaded) void SplashScreen.hideAsync();
+  }, [loaded, error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+  if (!loaded) return null;
+
   return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
-  const pathname = usePathname();
-  const [colorMode, setColorMode] = useState<'light' | 'dark' | 'system'>(
-    'dark'
-  );
+  const [colorMode, setColorMode] = useState<'light' | 'dark'>('dark');
+  const isDark = colorMode === 'dark';
 
   return (
-    <ThemeProvider value={colorMode === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <GluestackUIProvider mode={colorMode}>
-          <StatusBar style={colorMode === 'dark' ? 'light' : 'dark'} />
-          <Slot />
-          {pathname === '/' && (
-            <Fab
-              onPress={() =>
-                setColorMode(colorMode === 'dark' ? 'light' : 'dark')
-              }
-              className="m-6"
-              size="lg"
-            >
-              <FabIcon as={colorMode === 'dark' ? MoonIcon : SunIcon} />
-            </Fab>
-          )}
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+          <SessionProvider>
+            <RootNavigator isDark={isDark} toggleTheme={() => setColorMode(isDark ? 'light' : 'dark')} />
+          </SessionProvider>
         </GluestackUIProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
+  );
+}
+
+function RootNavigator({ isDark, toggleTheme }: { isDark: boolean; toggleTheme: () => void }) {
+  const { signedIn, restoring, restoreError } = useSession();
+
+  return (
+    <Stack screenOptions={{
+      headerTitleAlign: 'center',
+      headerBackButtonDisplayMode: 'minimal',
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          size="icon"
+          accessibilityLabel={isDark ? 'Byt till ljust tema' : 'Byt till mörkt tema'}
+          onPress={toggleTheme}
+        >
+          <Icon as={isDark ? SunIcon : MoonIcon} size="lg" />
+        </Button>
+      ),
+    }}>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Protected guard={!restoring && !restoreError && !signedIn}>
+        <Stack.Screen name="login" options={{ title: 'Logga in', headerBackVisible: false }} />
+        <Stack.Screen name="register" options={{ title: 'Skapa konto' }} />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn}>
+        <Stack.Screen name="expenses" options={{ title: 'Utgifter', headerBackVisible: false }} />
+        <Stack.Screen name="expenses/[id]" options={{ title: 'Utgiftsdetaljer' }} />
+        <Stack.Screen name="expenses/form" options={{ title: 'Ny utgift' }} />
+      </Stack.Protected>
+      <Stack.Protected guard={false}>
+        <Stack.Screen name="modal" />
+      </Stack.Protected>
+    </Stack>
   );
 }
