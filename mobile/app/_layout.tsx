@@ -71,6 +71,7 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="expenses" />
+        <Stack.Screen name="expenses/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={false}>
         <Stack.Screen name="modal" />

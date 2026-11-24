@@ -6,12 +6,11 @@ export class ApiError extends Error {
   }
 }
 
+export type ApiOptions = Omit<RequestInit, 'body' | 'headers'> & { body?: object };
+
 export async function apiRequest<T>(
   path: string,
-  { body, token, ...options }: Omit<RequestInit, 'body' | 'headers'> & {
-    body?: object;
-    token?: string;
-  } = {},
+  { body, token, ...options }: ApiOptions & { token?: string } = {},
 ): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (body) headers['Content-Type'] = 'application/json';
